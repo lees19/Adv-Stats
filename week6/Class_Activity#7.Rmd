@@ -1,0 +1,74 @@
+---
+title: "Class_Activity#7"
+author: "Sunny Lee"
+date: '2021-02-24'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Interaction and Terms for Curvature
+
+Use the 4-8Cyl data set for this class activity.
+```{r}
+cyl <- read.csv("C3 4_8Cyl.csv")
+attach(cyl)
+```
+
+1) Use the 4-8Cyl data set to calculate the two regression equations 
+```{r}
+m1 <- lm(Price~Mileage+Cyl)
+summary(m1)
+#interaction terms
+m2 <- lm(Price~Mileage*Cyl)
+summary(m2)
+```
+
+$$Price=\beta_0+\beta_1(Mileage)+\beta_2*Cyl)+\epsilon,$$
+
+$$Price=\beta_0+\beta_1(Mileage)+\beta_2*Cyl)+\beta_3(Mileage*Cyl)+\epsilon$$
+
+
+  a) Does the $R_{adj}^2$ value increase when the interaction term is added? Based on the change in $R^2_{adj}$, should the interaction term be included in the model?
+  
+The $R_{adj}^2$ value increase is about 2 percent when we add our interaction term is added. We conclude that this is not a large enough change to conclude the itneraction term is necessary. 
+
+  b) For both models, calculate the estimate price of a four cyliner car when Mileage=10,000.
+
+For the first model: $15350 - 0.2001(10000) + 3443(4) = 27121$ and for the second model: $4533.02363 + 0.34006(10000) + 5430.70175(4) - 0.09953(10000)(4) = 25675.23063$
+
+  c) Assume Mileage=10,000, for both models explain how increasing from four to eight cylinder will impact the estimated price.
+  
+Changing our calculations from 4 to 8 cylinders: our first model: $15350 - 0.2001(10000) + 3443(8) = 40893$ and our second: $4533.02363 + 0.34006(10000) + 5430.70175(8) - 0.09953(10000)(8) = 43416.83763$ and thus, we observe a $40893 - 27121 = 13772$ dollar difference going from 4 to 8 cylinders in the first model and a $43416.83763-25675.23063 = 17741.607$ dollar difference going from 4 to 8 cylinders in the second model. 
+  
+  d) conduct an extra sum of squares test to determine if the Mileagecyl interaction term is important to the model.
+  
+```{r}
+anova(m1, m2)
+```
+Running our extra sum of squares test, we see our p value is quite low and thus we would have to reject the null hypothesis. Since we reject the null hypothesis, we conclude that the second model significant and that we should use the model with the interaction term. 
+
+2) Use the 4-8Cyl data set to calculate the regression line $Price=\beta_0+\beta_1(Mileage)+\beta_2(Cadilac)+\beta_3(SAAB)$. You will need to create indicator variables for Make before calculating the regression line.
+
+    a) Create a scatterplot with Mileage as the explanatory variable and Price as the response. Overlay a second graph with Mileage as the explanatory variable and $\hat{y}$ as the response. Notice that the predicted value (the $\hat{y}$ values) form two seperate lines. Do the parallel lines (no interaction model) look appropriate?
+    
+```{r}
+Cadilac <- (Make == "Cadillac") * 1
+SAAB <- (Make == "SAAB") * 1
+m3 <- lm(Price~Mileage+Cadilac+SAAB)
+m4 <- lm(Price~Mileage*SAAB + Mileage*Cadilac)
+plot(Price~Mileage)
+points(m3$fitted.values~Mileage, col = "red")
+```
+The three parallel lines are the result of our categorical variables Cadillac and SAAB. Our model depends on Cadillac and SAAB, however there are other makes in the data as well. Thus, one of our red lines will model when Cadillac is 1, one will model when SAAB is 1 and the last will model when neither are 1. Thus, the parallel lines look appropriate considering our model. 
+
+
+    b) Conduct one extra sum of squares test to determine if interaction term (MileageCadilac and MileageSAAB) are important to the model (i.e. test the hypothesis $H_0:\beta_5=\beta_6=0$ versus $H_a:at least one of the coefficient is not zero)$. Create a scatterplot with the full regression model to explain the results of the hypothesis test. 
+```{r}
+summary(m3)
+summary(m4)
+anova(m3, m4)
+plot(Price~Mileage)
+points(m4$fitted.values~Mileage, col = "red")
+```
+From our anova table, we find that our p value for extra sum of squares is quite low, meaning we can reject the null hypothesis. Thus, we should be able to conclude that our interaction terms are significant in predicting the price. We can also see this is the case, as in our plot we get three non-parallel lines which would indicate that our interaction terms are affecting our model, as we had three parallel lines before. 

@@ -1,0 +1,77 @@
+---
+title: "Class Activity#12"
+author: "Sunny Lee"
+date: '2021-03-24'
+output:
+  pdf_document: default
+---
+
+Data Set: C7 Shuttle.csv
+1) Based on the description of the Challenger disaster O-ring concerns shuttle data, identify which variable should be the explanatory variable and which should be the response variable.
+```{r}
+shuttle <- read.csv("C7 Shuttle.csv")
+```
+The Success should be the response variable while temperature should be the explanatory variable. 
+
+2) Imagine you were an engineer working for Thiokol Corporation prior to January 1986. Create a few graphs of the data. Is it obvious that temperature is related to the success of the O-rings? Produce any charts or graphs you have created that show a potential relationship between temperature and O-ring damage.
+```{r}
+plot(shuttle$Success~shuttle$Temperature)
+```
+From the plot above, we see that there does seem to be some kind of correlation between the temperature and the success. 
+
+3) Use the shuttle data to create a scatterplot with a least squares regression line for the space shuttle data. Calculate the predicted response values ($\hat{y} = b_0 + b_1x$)  when the temperature is $60^0F$ and when the temperature is $85^0F$.
+```{r}
+lin.model <- lm(Success~Temperature, data = shuttle)
+summary(lin.model)
+plot(shuttle$Success~shuttle$Temperature)
+abline(lin.model, col="red")
+lin.model$coefficients[1]+lin.model$coefficients[2]*60
+lin.model$coefficients[1]+lin.model$coefficients[2]*85
+```
+When the temperature is $60^0f$, we see a success of $.34$ and when the temperature is $85^0F$, we see a success of $1.27$. 
+
+4) Solve for $\pi_i$ if  $\ln(\frac{\pi_i}{1-\pi_i})=\beta_0+\beta_1x_i$.
+$\frac{\pi_i}{1-\pi_i} = e^{\beta_0+\beta_1x_i}$
+$\pi_i = e^{\beta_0+\beta_1x_i} - \pi_i(e^{\beta_0+\beta_1x_i})$
+$\pi_i + \pi_i(e^{\beta_0+\beta_1x_i}) = e^{\beta_0+\beta_1x_i}$
+$\pi_i = \frac{e^{\beta_0+\beta_1x_i}}{1 + e^{\beta_0+\beta_1x_i}}$
+
+
+5) Use the equation of $\pi_i$ to create six plots. In each graph, plot the explanatory variable (x) versus the expected probability of success($\pi$) using $\beta_0=-10\quad\text{and}-5$ and $\beta_1=0.5,1,\quad\text{and}1.5$. explain the impact of changing $\beta_0$ and $\beta_1$.
+```{r}
+par(mfrow=c(2,3))
+beta_0 = c(-10,-5)
+beta_1 = c(0.5,1,1.5)
+
+for(i in 1:2){
+  for(j in 1:3){
+    pi <- (exp(beta_0[i]+beta_1[j]*shuttle$Temperature))/(1+exp(beta_0[i]+beta_1[j]*shuttle$Temperature))
+    plot(pi~shuttle$Temperature, xlab="Temperature")
+  }
+}
+
+```
+We see from the top row and the bottom row of plots that increasing $\beta_1$ automatically forces our model to predict 1 for all of our temperatures. Increasing $\beta_0$ also seems to move our model to predicting a success more often. 
+
+6) Use statistical software to calculate the maximum likelihood estimates of $\beta_0$ and $\beta_1$. Compare the maximum likelihood estimates to the least square estimates.
+```{r}
+logit <- glm(Success~Temperature, data = shuttle, family = "binomial")
+summary(logit)
+```
+From our linear regression model, we find $\beta_0 = -1.90476$ and $\beta_1 = 0.03738$. However, for our logistic regression model, we find $\beta_0 = -15.0429$ and $\beta_1 = 0.2322$. 
+
+7) Use the regression out put to predict the probabilty that a launch has no O-ring damage when the temperature is $31^0F$, $50^0F$, and $75^0F$.
+```{r}
+exp(logit$coefficients[1] + logit$coefficients[2]*31) / (1 + exp(logit$coefficients[1] + logit$coefficients[2]*31))
+exp(logit$coefficients[1] + logit$coefficients[2]*50) / (1 + exp(logit$coefficients[1] + logit$coefficients[2]*50))
+exp(logit$coefficients[1] + logit$coefficients[2]*75) / (1 + exp(logit$coefficients[1] + logit$coefficients[2]*75))
+
+```
+Using our $\beta_i$ from our logistic regression model, we find a a probability of $0.0003912171, 0.03122648, 0.9144564$ for the temperatures of $31, 50, and 75$ degrees celsius respectively. 
+
+8) Calculate the odds of a launch with no O-ring damage when the temperature is $60^0F$ and when the temepetature is $70^0F$.
+```{r}
+exp(logit$coefficients[1] + logit$coefficients[2] * 60)
+exp(logit$coefficients[1] + logit$coefficients[2] * 70)
+```
+The odds of launching with no O-ring damage when the temperature is $60^0F$ is $.33$ times higher than launching with O-ring damage. The odds of launching with no 0-ring damage when the temperature is $70^0F$ is $3.35$ times higher than launching without O-ring damage.  

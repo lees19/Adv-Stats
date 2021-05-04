@@ -1,0 +1,58 @@
+---
+title: "asdf"
+author: "Sunny Lee"
+date: "3/31/2021"
+output: pdf_document
+---
+
+```{r}
+y <- c(1, 0, 1, 1, 0, 1)
+x <- c(20, 18, 22, 24, 23, 25)
+
+m1 <- glm(y~1, family = "binomial")
+summary(m1)
+m1$fitted.values
+
+-2 * sum(y*log(m1$fitted.values) + (1-y)*log(1-m1$fitted.values))
+
+m2 <- glm(y~x, family = "binomial")
+summary(m2)
+-2 * sum(y*log(m2$fitted.values) + (1-y)*log(1-m2$fitted.values))
+
+pchisq(1.2249, df = 1, lower.tail = F)
+
+
+```
+
+```{r}
+x<-c(20,15,18,21,25,19,17)
+y<-c(1,0,1,1,0,0,1)
+
+logit_asso <- glm(y~x, family = "binomial")
+summary(logit_asso)
+
+p <- exp(logit_asso$coefficients[1] + logit_asso$coefficients[2] * x) / (1 + exp(logit_asso$coefficients[1] + logit_asso$coefficients[2] * x))
+p
+```
+
+```{r}
+#cancer2 <- read.csv("C7 Cancer2.csv")
+
+#model wtih radius as explanatory variable and Malignancy as a response variable
+logit <- glm(Malignant~radius,data = cancer2, family = "binomial")
+summary(logit)
+G <- logit$null.deviance-logit$deviance
+G
+p_value <- pchisq(G, df = 1, lower.tail = F)
+p_value
+logit2 <- glm(Malignant~radius+concavity,data = cancer2, family = "binomial")
+summary(logit2)
+G1 <- logit2$null.deviance-logit2$deviance
+G1
+p_value <- pchisq(G1, df = 1, lower.tail = F)
+p_value
+```
+
+```{r}
+dpois(5, lambda = 3)
+```

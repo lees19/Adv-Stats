@@ -1,0 +1,149 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage[unicode=true]{hyperref}
+\hypersetup{
+            pdftitle={Exam\#1},
+            pdfauthor={Linear Regression},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+\title{Final Project}
+\author{Math 2200-Advanced Statistics }
+\date{March 28, 2021}
+
+\begin{document}
+\maketitle
+\section{Project Description}
+\subsection{Overview}
+This project is meant to be a capstone experience, meaning that you are expected to apply what you have learned in the class this semester when analyzing a real set of data.
+
+You may work alone or in a group of up to 3 people. Each group will submit a single report. Members in groups of more than one are expected to contribute equally to the analysis of the data and to the writing of the report. \textbf{All members in a group will receive the same final project grade.}
+
+I will provide you with at least one multivariate data set to analyze, but if you have your own data to analyze (perhaps data arising from your own research or consulting work or from the literature or the web), you may use this as long as you check with me to make sure it is appropriate for the purposes of this project.
+
+\subsection{Analysis}
+In addition to looking at the basic descriptive statistics of the data, you will analyze the data set with at least two methods(Multiple linear regression, logistic regression, or nonparametric test) we have already learned (Chapters 1,2,3, 6, and 7) . When applying a specific method, make sure to state any conditions or assumptions of this method and check to see if they are met. For example, if one assumption is that the observation is a normal distribution, you should use Q-Q plots of the residuals and other scatter plot to access nornality. If they are not met, and you are not able to transform the data in any way so that they are met, make sure to comment on this in your final report (you should still perform the intended analysis, however).
+
+\subsection{Report}
+You should write a report loosely formatted as a manuscript and include the following sections:
+\begin{enumerate}
+	
+	\item  Introduction
+\item Data description and exploratory analysis
+\item Methods and analysis (*This section can be split into multiple sections, one for
+each type of analysis performed.)
+\item Conclusions
+	
+	\end{enumerate}
+	
+Sections in your report should be clearly defined with a proper paragraphs,  grammar, and complete sentences should be used throughout. Tables and figures should be labeled and captioned. \textbf{\underline{Including computer output by cutting and pasting huge sections of output is not acceptable;}} you need to pick from the output the important quantities and include them (NEATLY!!!) in the body of your report. Other than these requirements, there is no other required format (APA, MLA, etc.) for the final report. If you do a bit of research on your own relevant to your project, a list of literature citations should also be included.
+	
+
+A certain length is not required as I am more concerned that your report is complete. However, projects between 7 and 12 pages are probably a good length. If you wish to include (unedited) software code and output, please do so in an Appendix
+	
+
+\subsection{Due Date}
+
+
+Projects are due on Tuesday, April 20 by 5:00 pm. You must submit only one pdf file via grade-scope. 
+
+\subsection{Grading}:There are 100 points possible for this project. I will assign scores based on the point breakdown below.
+\begin{itemize}
+	\item Introduction [10]
+	\item Data Description and explanatory analysis [25]
+	\item Method and Analysis [50]
+	\item Conclusion [15]
+	\end{itemize}
+Let me know if you have any questions!
+\newpage
+
+The data set housing.txt (and housing.xls) contains information on 2425 single-family detached residential houses sold in a Midwestern city between 2006 and 2010. The variables recorded for each include:
+
+\begin{itemize}
+\item	Order: Observation number
+\item LotArea: Lot size in square feet
+\item Alley: Alley access (yes/no)
+\item LotConfig: Lot configuration (inside lot, corner lot, cul-de-sac, frontage on 2 sides of
+property, frontage on 3 sides of property)
+\item OverallQual: Rating of overall material and finish of house (0-10)
+\item OverallCond: Rating of overall condition of the house (0-10)
+\item YearBuilt: Original construction date
+\item YearRemod: Remodel date (this will be same as the construction date if no remodeling or
+additions)
+\item Foundation: Type of foundation (brick \& tile, cinder block, poured concrete, slab, stone,
+wood)
+\item BsmtFin: Square footage of basement that is finished
+\item BsmtUnf: Square footage of basement that is unfinished
+\item AC: central air conditioning (yes/no)
+\item GrLivArea: Above ground living area in square feet
+\item HalfBath: Number of half bathrooms
+\item FullBath: Number of full bathrooms
+\item BedroomAbvGr: Number of bedrooms above ground
+\item KitchenQual: Kitchen quality (excellent, good, typical/average, fair, poor)
+\item TotRmsAbvGrd: Total number of rooms above ground (not including bathrooms)
+\item Fireplaces: Number of fireplaces
+\item GarageFinish: Interior finish of garage (finished, rough finished, unfinished, NA/no
+garage)
+\item GarageCars: car capacity of garage
+\item GarageArea: size of garage in square feet
+\item  WoodDeckSF: Wood deck area in square feet
+\item PorchSF: Porch area (included open porches, enclosed porches, three-season porches,
+and screened porches) in square feet
+\item YrSold: Year house was sold
+\item SalePrice: sale price
+	
+	\end{itemize}
+
+
+\end{document}

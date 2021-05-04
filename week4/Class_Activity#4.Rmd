@@ -1,0 +1,115 @@
+---
+title: "Class Activity#4"
+author: "Write Your Name"
+date: '2021-02-08'
+output:
+  pdf_document: default
+  html_document: default
+---
+Multiple Linear Regression:
+
+Use the cars data in order to understand multiple linear regression: 
+
+1) produce a scatterplot from the cars data set to display the relationship between mileage(Mileage) and suggested retail price (Price). Does the scatterplot show a strong relationship between Mileage and Price?
+
+```{r}
+cars <- read.csv("C3 Cars.csv")
+
+plot(Price~Mileage, data = cars)
+```
+From the scatterplot above, there definitely is not a strong relationship between Mileage and Price. 
+
+2) Calculate the least squares regression line, $Price = b_0 + b_1(mileage)$. Report the regression model, the $R^2$ value, the correlations coefficient, the t-statistics, and p-values for the estimated model coefficients (the intercept and slope). Based on these statistics, can you conclude that Mileage is a strong indicator of price? Explain your reasoning in a few sentences.
+
+```{r}
+M1 <- lm(Price~Mileage, data = cars)
+
+summary(M1)
+cor(cars$Price, cars$Mileage)
+```
+The correleations coefficient can be found using the cor() function, and when we pass Price and Mileage into cor(), we get -0.1430505, which is quite close to zero, meaning Price and Mileage do not have a very high linear correlation. For our t-statistic, we get 27.383 for our $\beta_0$ and -4.093 for our $\beta_1$.
+From the summary above, the intercept and Mileage $\beta$'s have quite low p values thus, we conclude $\beta_0$ is a significant predictor of Price as well as Mileage. However, looking at the $R^2$ value, we find that our model captures a very low amount of the variation in the data given. Thus, while we can conclude Mileage is significant in predicting Price, our model does not perform well.
+
+3) The first car in this data set is a Buick Century with 8221 miles. Calculate the residual value for this car (observed retail price minus the expected price calculated from the regression line).
+```{r}
+M1$residuals[1]
+```
+By using our linear model, we can find the residual of the first car by accessing the first index of the residuals. 
+
+4) Use the Cars data to conduct a stepwise regression analysis.
+  a) Calculate the seven regression models, each with one of the following explanatory variables: Cyl, Liter, Doors, Cruise, Sound, Leather, and Mileage. Identify the explanatory variable that corresponds to the model with the largest $R^2$ value. Call this variable $X_1$.
+```{r}
+A1 <- lm(Price~Cyl, data = cars)
+summary(A1)
+A2 <- lm(Price~Liter, data = cars)
+summary(A2)
+A3 <- lm(Price~Doors, data = cars)
+summary(A3)
+A4 <- lm(Price~Cruise, data = cars)
+summary(A4)
+A5 <- lm(Price~Sound, data = cars)
+summary(A5)
+A6 <- lm(Price~Leather, data = cars)
+summary(A6)
+A7 <- lm(Price~Mileage, data = cars)
+summary(A7)
+
+#how to create a linear regression without intercept
+A1 <- lm(Price~Cyl-1, data = cars)
+summary(A1)
+
+```
+We find that Cyl has the highest $R^2$ value among the rest, meaning for a single varaible, Cyl captures the greatest amount of variation. 
+
+  b)Calculate six regression models. Each model should have two explanatory variables, $X_1$ and one of the six explanatory variables. Find the two-variable model that has highest $R^2$ value. How much did $R^2$ improve when this variable was included?
+```{r}
+B1 <- lm(Price~Cyl+Liter, data = cars)
+summary(B1)
+B2 <- lm(Price~Cyl+Doors, data = cars)
+summary(B2)
+B3 <- lm(Price~Cyl+Cruise, data = cars)
+summary(B3)
+B4 <- lm(Price~Cyl+Sound, data = cars)
+summary(B4)
+B5 <- lm(Price~Cyl+Leather, data = cars)
+summary(B5)
+B6 <- lm(Price~Cyl+Mileage, data = cars)
+summary(B6)
+
+```
+From the summary above, we find that Cyl + Cruise has the highest $R^2$ value, meaning Cyl and Cruise captures the greatest amount of variation with two predictors. The $R^2$ value increased by 0.0609. 
+
+  c) Instead of continuing this process to identify more variables, use the software instructions provided to conduct a stepwise regression analysis. List each of the explanatory variables in the model suggested by the stepwise regression procedure.
+
+```{r}
+library(leaps)
+attach(cars)
+X <- cbind("Cyl", Liter, Sound, Mileage, Cruise, Doors, Leather)
+Best.model <- leaps(X, Price, method = "Cp")
+cbind(Best.model$Cp, Best.model$which)
+Best.lm <- lm(Price~Cyl+Sound+Mileage+Cruise+Doors+Leather)
+summary(Best.lm)
+
+
+Model_adj <- lm(Price~Cyl+Sound+Mileage+Cruise+Doors+Leather)
+summary(Model_adj)
+```
+
+From the above, we find that our leaps function finds that out of our 7 variables, only six are needed. We came to this conclusion by taking the lowest value in the first column of the cbind function which happens to be where there are ones for every significant explanatory variable. The significant explanatory variables were: Cyl, Sound, Mileage, Cruise, Doors, Leather. 
+```{r}
+################## Cross validation using model selection and subsets
+Data_selection <- data.frame(Cyl, Liter, Sound, Mileage, Cruise, Doors, Leather, Price)
+Reg_subset <- regsubsets(Price~., data = Data_selection)
+summary(Reg_subset)
+Reg_summary <- summary(Reg_subset)
+Reg_summary$adjr2
+Reg_summary$cp 
+a<-c(1, 2, 3, 4, 5, 6, 7)
+plot(Reg_summary$adjr2~a)
+points(Reg_summary$adjr2, type = "l", col = "green")
+plot(Reg_summary$cp~a)
+points(Reg_summary$cp, type = "l", col = "green")
+Reg_summary$rss
+
+```
+  

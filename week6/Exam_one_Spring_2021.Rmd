@@ -1,0 +1,212 @@
+---
+title: 'Exam #1'
+author: "Sunny Lee"
+date: '2021-02-20'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Instructions:  Due Tuesday February 23, 2021. You may not get help on the exam from your classmates, or any external sources.  You can use your notes from this class, including your home work and any posted class activities, R-code, or solutions. Include all R-code and other relevant information for full credit. Submit only a pdf file.
+
+
+Type your name here to indicate that you understand the instructions and implications for academic honesty. 
+Sunny Lee
+
+
+
+
+Import the csv file TakeHome\#1 into R.
+
+
+1. Regression: 
+Create a multiple linear regression model, M1, to predict mpg using six different predictor variables such as cylinders, displacement, horsepower, weight, acceleration, and origin.
+```{r}
+data <- read.csv("Takehome#1.csv")
+data
+attach(data)
+M1 <- lm(mpg~cylinders+displacement+horsepower+weight+acceleration+origin)
+summary(M1)
+```
+  a. What is the mean of mpg?
+```{r}
+mean(mpg)
+```
+The mean of mpg is 23.44592 miles per gallon. 
+
+  b. Write down the best fit equation for $M1$.
+  
+Looking at the summary of our multiple linear regression model, we find that our best fit equaiton is: $43.2892567 - 0.5658671(cylinders) + 0.0125099(displacement) - 0.0621301(horsepower) - 0.0048629(weight) - 0.0335309(acceleration) + 1.4668066(origin)$. 
+
+  c. Create the following plots based on $M1$, and for each one write one sentence explaining what you observe in your submitted graph:
+
+      i. A scatter plot of mpg (on the $y$-axis) vs cylinder (on the x-axis).
+```{r}
+plot(mpg~cylinders)
+```
+The mpg vs cylinders scatterplot shows that there are definitely different variances for different cylinders.
+
+      ii. A histogram of the residuals.
+```{r}
+hist(M1$residuals)
+```
+From the histogram of the residuals, we find that the residuals seem to be quite normally distributed.
+
+      iii. A Normal-Q-Q plot of the residuals.
+```{r}
+qqnorm(M1$residuals)
+qqline(M1$residuals)
+```
+We see some skewness on the right hand side of the graph, however, everywhere else, the residuals look very normally distributed. 
+
+      iv. A scatter plot of the residuals vs mpg.
+```{r}
+plot(M1$residuals~mpg)
+```
+The residuals seem to be quite constant up until $mpg = 20$, where the residuals seem to increase with $mpg > 20$. 
+
+      v. A scatter plot of the residuals vs their index (the row of the observation in the dataset).
+```{r}
+plot(M1$residuals~X, data = data)
+```
+The scatterplot vs order plot seems to increase overall as order increases. The variation in the residuals also seems to increase with the order.
+
+  d. Interpret all of the slope coefficient for in $M1$.  
+```{r}
+M1$coefficients
+```
+From coefficients of the model, we find that cylinders, horsepower, weight and acceleration all have a negative slope, meaning as these numbers increase, the mpg tends to decrease. However, mpg tends to increase with displacement and origin.
+
+  e.  Use model selection method to develop a model for predicting mpg and call it M2. Use M2 to answer the following questions:
+```{r}
+library(leaps)
+X <- cbind(cylinders, displacement, horsepower, weight, acceleration, origin)
+Best.model <- leaps(X, mpg, method = "Cp")
+cbind(Best.model$Cp, Best.model$which)
+M2 <- lm(mpg~horsepower+weight+origin)
+summary(M2)
+```
+	  i.  Is there a relationship between the predictors and responses?
+	  
+There is absolutely a relationship between the predictors and responses. If we look at the p-value for each of our predictors, they are all very low. Our $R^2$ value also very good considering we are only using 3 variables.
+
+	  ii. Use diagnostic plots to check if variance is constant. 
+```{r}
+par(mfrow = c(2, 2))
+plot(M2$residuals~horsepower)
+abline(h = 0, col = "red")
+plot(M2$residuals~weight)
+abline(h = 0, col = "red")
+plot(M2$residuals~origin)
+abline(h = 0, col = "red")
+plot(M2$residuals~M2$fitted.values)
+abline(h=0, col = "red")
+```
+Our variance seems only to be constant in the residuals vs origin plot and nowhere else. The residuals vs horsepower and residuals vs weight plots seem to have decreasing variances while the residuals vs fitted values seem to have increasing varaince.
+
+	  iii. Does residuals appear to be uncorrelated?
+```{r}
+plot(M2$residuals~X, data = data, type = "l")
+points(M2$residuals~X, data = data)
+```
+The plot shows us that the residuals do not seem to be correlated as there does not exist a pattern in the plot. 
+
+2. Use \textbf{C2 Game2} data set for this problem: Assume that in the computer game study researchers were also interested in testing whether college students could play the game more quickly with their right hand or left hand. The data set Games2 shows a column Type2 with four types of games, based on distracter and which hand was used. 
+```{r}
+game <- read.csv("C2 Games2.csv")
+attach(game)
+game
+```
+  a. Graph the data and compare the center and spread of the completion times for each of the four groups listed under Type2. Does any group have outliers or skewed data?
+```{r}
+boxplot(Time~Type2)
+```
+All four groups seem to have different means and different variances. ColorRight and StandardRight both have very skewed data while StandardLeft is the only one with an outlier. 
+
+ b. Conduct an ANOVA to compare mean completion time of the four groups. Include hypothesis testing and conclusion
+```{r}
+anova <- aov(Time~Type2)
+summary(anova)
+```
+By ANOVA, we find that our p value is very low, which means we reject the null hypothesis. Thus, we can conclude the effects for the four groups are not equal to each other. Since the means of the completion times rely on the same grand mean, we find that the mean completion time for the four groups are not equal. 
+
+ c.  Create residual plots of the ANOVA model. Are the model assumptions satisfied?
+```{r}
+Resid <- anova$residuals
+par(mfrow = c(2, 2))
+hist(Resid)
+qqnorm(Resid)
+qqline(Resid)
+boxplot(Resid~Type2)
+plot(Resid <- order(Resid))
+points(Resid, col = "blue", type = "l")
+```
+Looking at the histogram and the qqplot, we find that the residuals do not seem to be very normally distributed with skewness to one side. Looking at the boxplot, we see the residuals definitely have differing levels of variance. Looking at the residuals vs order plot, we see there is no pattern to the residuals. 
+
+ d Check if equality variance assumption is satisfied.
+```{r}
+boxplot(Resid~Type2)
+```
+Checking the variance of the residuals each of the game types, we find that the variances definitely are not equal from the boxplot above.
+
+3. The effect of collinearity between explanatory variable.  
+
+  a. perform the following R command set.seed(2200)\\
+  b.  $x1<-runif(100)$\\
+  c. $x2<-0.5*x1+rnorm(100)/10$\\
+  d.  $y=2+2*x1+0.3*x2+rnorm(100)$\\
+```{r}
+set.seed(2200)
+x1 <- runif(100)
+x2 <- 0.5*x1+rnorm(100)/10
+y <- 2+2*x1+0.3*x2+rnorm(100)
+```
+The last line corresponds to creating a linear model in which y is a function of x1 and x2. Write out the form of the linear model. What are the regression coefficients?
+
+The linear model we have created is: $y = 2 + 2x_1+0.3x_2$ and we would expect the regression coefficients to be $2$ and $0.3$. 
+
+   i. What is the correlation between x1 and x2? Create a scatterplot displaying the relationship between the variables.
+
+$x_1$ and $x_2$ have a linear correlation where $x_2$ is roughly half of $x_1$. We can also see this relationship in a scatterplot as well: 
+```{r}
+plot(x2~x1)
+```
+
+   ii. Using this data, fit a least square regression to predict y using x1 and x2. Describe the results obtained. What are $\hat{\beta}_0$, $\hat{\beta}_1$, and $\hat{\beta}_2$? How do these relate to the true  ${\beta}_0$, $t{\beta}_1$, and ${\beta}_2$? Can you reject the null hypothesis $H_o:\beta_1=0$? How about the null hypothesis $H_o:\beta_2=0$?
+   
+```{r}
+model <- lm(y~x1+x2)
+summary(model)
+```
+$\hat{\beta}_0$, $\hat{\beta}_1$, and $\hat{\beta}_2$ are estimated to be $2.2163$, $1.9782$ and $-0.4955$ respectively. The true values of ${\beta}_0$, $t{\beta}_1$, and ${\beta}_2$ are: $2$, $2$ and $0.3$. The $\beta_1$ p value is quite low, meaning we can reject the null hypothesis and take the estimated value of $1.9782$ as our $\hat{\beta_1}$. $\hat{\beta_2}$, however, has a very high p value, and thus we cannot reject the null hypothesis.
+
+  iii. Now fit a least squares regression to predict y using only x1. Comment on your results. Can you reject the null hypothesis $H_0:\beta_1=0$.
+```{r}
+model1 <- lm(y~x1)
+summary(model1)
+```
+By using only $x_1$, we get a very similar $R^2$ value. The $\beta_0$ values for the two models are similar, however the $\beta_1$ values differ. We also see a marginal decrease in the $R^2$ value and an increase in the adjusted $R^2$. The p value for $x_1$ is also much smaller than our previous model meaning our $\hat\beta_1$ is significant in predicting $y$. 
+
+ e. Now fit a least squares regression to predict y using only x2. Comment on your results. Can you reject the null hypothesis $H_0:\beta_1=0$.
+
+```{r}
+model2 <- lm(y~x2)
+summary(model2)
+
+```
+With the model only using $x_2$, we find that the $\hat{\beta_0}$ strays further from the actual $\beta_0$. The p value for $x_2$ is quite small, which leads us to reject the null hypothesis, meaning our $\hat\beta_2$ is significant in predicting $y$. However, the $R^2$ value and adjusted $R^2$ values are much lower than both models above. 
+
+3.6) 
+```{r}
+library(car)
+
+vif(model)
+
+model3 <- lm(x1~x2)
+summary(model3)
+
+model4 <- lm(x2~x1)
+summary(model4)
+
+```
+Since we only have two variables, we only need to check for two $R^2$ values. The first model $model3$ is a linear model with $x_1$ as the response and $x_2$ as the explanatory variable with model4 the other way around. Looking at the summary of these two models, we find that both $R^2$ values are $0.626$ thus, the VIF for both variabels will be the same. Calculating the VIF we get $2.67379679144$, which is much larger than $1$. Thus, we can conlude that our two variables $x_1$ and $x_2$ are correlated in some way. We can also check our answer by using the vif() command. 

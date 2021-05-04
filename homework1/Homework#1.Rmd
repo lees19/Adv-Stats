@@ -1,0 +1,117 @@
+---
+title: "Homework#1"
+author: "Sunny Lee"
+date: '2021-02-08'
+output: pdf_document
+---
+This homework assignment is expected to provide a basic understanding of the two-sample t-test, Regression, and Anova. Use the \textbf{C2 Games2.csv} data to answer the following questions: In this homework, we would like to understand whether a student could play the game quickly with their right or left hand. We want to compare the completion time with hand used to play. \textbf{Make sure to explain every plots and outputs and please do not incude irrelevant information to the question.} \textbf{This homework is due on Monday January 15,2021.}
+
+1) Create a histogram and box plot of the completion time for both right and left hand. 
+```{r}
+game <- read.csv("C2 Games2.csv")
+game
+hist(game$Time)
+boxplot(game$Time)
+```
+From the histogram above, we see the data definitely seems skewed to the left side. The boxplot shows there does not seem to be any outliers. 
+
+2) Calculate the mean, sd, and variance completion time for the game played with right hand and left hand.
+```{r}
+left <- subset(game, game$Hand == "Left")
+right <- subset(game, game$Hand == "Right")
+
+mean(right$Time)
+sd(right$Time)
+var(right$Time)
+```
+From the above, we find that the mean time for the right hand is 35, the sd is 2.790963 and the variance is 7.789474.
+```{r}
+mean(left$Time)
+sd(left$Time)
+var(left$Time)
+```
+From the above, we find that the mean time for the right hand is 38.65, the sd is 3.674593 and the variance is 13.50263. 
+
+3) Use informal test to determine if the  equal variance assumption is appropriate for this study. 
+```{r}
+max(var(right$Time), var(left$Time)) / min(var(right$Time), var(left$Time))
+```
+Using the informal test, we find that the maximum variance over the minimum variance is 1.733446, which is less than 4, thus we can assume the variances are equal. 
+
+4) Plot residuals versus the order of the data to determine if any pattern exist that may indicate the observations are not independent.
+```{r}
+resid_left <- left$Time-mean(left$Time)
+resid_right <- right$Time-mean(right$Time)
+
+resid <- c(resid_left, resid_right)
+plot(resid~game$studentID)
+points(resid~game$studentID, type = "l")
+```
+
+From the graph above, we find that the residuals against the order do not have any pattern to indicate the observations are not independent.
+
+5) Use a statistical software (t.test()) to conduct a two sample t-test (assuming equal variances) and find the p-value corresponding to this statistics. Calculate the test statistic by hand and check if its equal with the result from t.test. In addition, use a software to calculate a 95% confidence interval for the difference between the two means $\mu_1-\mu_2$. 
+```{r}
+t.test(right$Time, left$Time, paired = FALSE, var.equal = TRUE, conf.level = .95, mu = 0, alternative = "two.sided")
+```
+
+From the t.test(), we find our t value is 3.5375 with a corresponding p value of 0.001083, from which we can reject the null hypothesis. We also find that the 95 percent confidence interval is (-5.738764, -1.561236). 
+
+6)  Use software instructions and the Game2 data to create indicator variables with $x=1$ represents the game played with right hand and $x=0$ represents the left hand game. Develop a regression model using the Time as the response variable and the indicator variable as the explanatory variable.
+```{r}
+D <- (game$Hand == "Right")*1
+model <- lm(game$Time~D)
+
+summary(model)
+```
+Here, we take our boolean array of right = 1 and left = 0 and we fit a linear model using lm(). By using the summary(), we find that our p value for $\beta_1$ is less than .05, thus we can conclude $\beta_1 \neq 0$. 
+
+7) Use statistical software to calculate the t-statistic and p-value for the hypothesis test $H_0: \beta_1=0$ versus $H_a: \beta_1\neq 0.$ Conduct a 95% confidence interval for $\beta_1$. Based on the statistis, can you conclude that the coefficient, $\beta_1$, is significantly different from zero?
+
+```{r}
+confint(model)
+```
+Based on the confidence interval, we can definitely conclude $\beta_1$ is significantly different from zero, as zero lies to the right of the 97.5 percent of our confidence interval. 
+
+8) Calculate the residuals from the regression line. Plot a histogram of the residuals (or create a normal probability plot of the residuals). Create a residual verus order plot. 
+```{r}
+hist(model$residuals)
+qqnorm(model$residuals)
+qqline(model$residuals)
+
+plot(model$residuals~game$studentID)
+points(model$residuals~game$studentID, type = "l")
+```
+We can find the residuals of our model from model$residuals. From the histogram and the qqnorm plots, we find that the residuals are quite normally distributed. Plotting the residuals against the order, we find that the residuals do not have any kind of pattern, and we conclude our residuals are not only normally distributed, but also iid. 
+
+9) Estimate the effect size for the right and left completion time. 
+```{r}
+grand_mean <- mean(game$Time)
+
+right_effect <- mean(right$Time) - grand_mean
+left_effect <- mean(left$Time) - grand_mean
+right_effect
+left_effect
+```
+
+From the above, we find the right effect is -1.825 and the left effect is 1.825. 
+
+10) Use statistical software to calculate the F-statistics and find the p-value. Use the p-value to draw conclusions from this study.
+```{r}
+model1 <- aov(game$Time~D)
+
+summary(model1)
+```
+
+From our ANOVA table, we find that the F value and the p value are the same for the linear regression model. 
+
+11) Check the model assmptions by creating a histogram of the residuals, a plot of the residuals versus the hand, and a plot of the residuals versus the order. 
+```{r}
+hist(model1$residuals)
+plot(model1$residuals~D)
+boxplot(model1$residuals~D)
+plot(model1$residuals~game$studentID, type = "l")
+points(model1$residuals~game$studentID)
+```
+
+From the histogram above, we find that the residuals seem to be quite normally distributed. From the graph of the residuals against the order, we see there is no pattern in the residuals, and so we conclude the residuals are iid. From the plot of the residuals versus the hand, we find the variance is definitely larger in the left handed times than the right handed times. This is also shown in the boxplot, where we clearly see the $D=1$ boxplot has a much larger range than the $D=0$ boxplot. 

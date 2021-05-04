@@ -1,0 +1,116 @@
+---
+title: "Class_Activity#6"
+author: "Sunny Lee"
+date: '2021-02-22'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Categorical Explanatory Variables: 
+```{r}
+cars <- read.csv("C3 Cars.csv")
+attach(cars)
+table(Make)
+```
+
+1) Create boxplots or individual value plots of the response variable TPrice versus the categorical variables Make, Model, Trim, and Type. Describe any pattern you see. 
+```{r}
+Tprice <- log10(Price)
+boxplot(Tprice~Make)
+boxplot(Tprice~Model)
+boxplot(Tprice~Trim)
+boxplot(Tprice~Type)
+```
+Throughout every plot, we find each of the categorical variables seem to have very different means and variances. 
+
+2) Create an indicator variables for Make. Name the columns, in order, Buick, Cadillac, Chevrolet, Pontiac, SAAB, and Saturn. Look at the new data columns and describe how the indicator variables are defined. For example, list all possible outcomes for the Cadillac indicator variable and explain what each outcome represents.
+```{r}
+Buick <- (Make == "Buick")*1
+Cadillac <- (Make == "Cadillac")*1
+Chevrolet<-(Make == "Chevrolet")*1
+Pontiac<-(Make == "Pontiac")*1
+SAAB<-(Make == "SAAB")*1
+Saturn<-(Make == "Saturn")*1
+cars[Buick, ]
+```
+We define the indicator variables by replacing the make with a 1 if the indicator variable is that make or 0 if it is not. 
+
+3) Build a new regression model using Tprice as the response and Mileage, Liter, Saturn, Cadillac, Chevrolet, Pontiac, and SAAB as the explanatory variables. Explain why you expect the $R^2$ value to increase when you add terms for make?
+```{r}
+model <- lm(Tprice~Mileage+Liter+Saturn+Cadillac+Chevrolet+Pontiac+SAAB)
+model1 <- lm(Tprice~Mileage+Liter+Make)
+summary(model)
+```
+When we add more varaibles to our model, the more we train our model to predict different makes. For example, if the model only had Saturn as one of the exaplanatory variables, our model would do a poor job of predicting other makes such as Cadillac. Thus, when we add more variables to our model, we are able to predict a much larger set of makes. 
+
+4) Include the Make and Type indicator variables, plus the variables Liter, Doors, Cruise, Sound, Leather, and Mileage, in a model to predict Tprice. Does the normality plot suggest that the residuals could follow a normal distribution? Describe whether the residuals versus fit, the residuals versus order, and the residuals versus each explanatory variables.
+```{r}
+model2 <- lm(Tprice~Liter+Doors+Cruise+Sound+Leather+Mileage+Make+Type)
+summary(model2)
+resid <- model2$residuals
+fit <- model2$fitted.values
+
+hist(resid)
+qqnorm(resid)
+qqline(resid, col = "blue")
+plot(resid~fit)
+abline(h=0, col = "green")
+plot(resid~order(resid))
+plot(resid~Liter+Doors+Cruise+Sound+Leather+Mileage)
+boxplot(resid~Make)
+boxplot(resid~Type)
+```
+Looking at the histogram and the qqplot, we see the residuals are very normally distrubted, except for a couple of outliers. The residuals vs fit and order both seem to have a constant variance and zero mean. For the explanatory variables, residuals against Sound and Leather seem to have mean zero and a constant variance, however every other exaplanatory variable seems to have nonconstant variance. 
+
+5) Create a regression model too predict price from Mileage for the Cavalier data. Calculate the total sum of squares (SST), residual sum of squares (SSE), and regression sum of squares (SSR). Verify that SST=SSE+SSR.
+```{r}
+cav <- read.csv("C3 Cavalier.csv")
+model3 <- lm(cav$Price~cav$Mileage)
+price_avg <- mean(cav$Price)
+yhat <- model3$fitted.values
+SSR <- sum((yhat - price_avg)^2)
+SSR
+SSE <- sum((model3$residuals)^2)
+SSE
+SST <- sum((cav$Price - price_avg)^2)
+SST
+
+SSE+SSR 
+```
+We calculate SSE by taking the residuals of the model and squaring each value. To calculate the SSR, we take the difference between our predictions and the overall average price and sum the square of those values. SST we calculate by summing over the square difference between the price and the average. Now that we have SSE, SSR and SST, we can verify SST=SSE+SSR, which we see is correct.
+
+6) show that $\sum_{i=1}^n(y_i-\hat{y}_i)(\hat{y}_i-\bar{y})=0$ for the model in the previous question.
+```{r}
+err <- model3$residuals
+reg <- model3$fitted.values - mean(cav$Price)
+round(sum(err*reg))
+```
+Since $(y_i - \hat{y}_i)$ is just our residuals, we can use the residuals which are calculated with the lm() function. $(\hat{y}_i-\bar{y})$ is just our fitted values minus the mean, thus we can easily calculate this by using the fitted.values from the lm() funciton and taking the mean of the Price. Then, by summing over err*reg, we find the sum is zero. 
+
+
+7) Consider the Cavalier data set and the regression model 
+$$y=\beta_0+\beta_1(Mileage)+\beta_2(Cruise)+\epsilon.$$
+Submit the ANOVA table, F-statistic, and p-value to test the hypothesis: $H_o: \beta_1=\beta_2=0$ versus $H_a:\text{at least one of the coefficients is not 0.}$
+
+```{r}
+#just talk about the results
+model7 <- lm(cav$Price~cav$Mileage + cav$Cruise)
+summary(model7)
+summary(aov(model7))
+
+```
+For our multiple linear regression, we obtain an F-value of 32.86 and a p-value of 5.834e-08. Since our p-value is quite low, we can reject the null hypothesis. Thus, we can conclude at least one of the coefficients are not zero. 
+
+8) Conduct an extra sum of squares test to determine if Trim is useful. More specifically, use the reduced model in the previous question and the full model
+$$y=\beta_0+\beta_1(Mileage)+\beta_2(Cruise)+\beta_3(Ls Sport Sedan 4D)+ \beta_4(Sedan 4D)+\epsilon.$$ 
+to test the hypothesis $H_0: \beta_3=\beta_4=0$ versus $H_a: \text{at least one of the coefficients is not 0.}$
+```{r}
+M8 <- lm(cav$Price~cav$Mileage+cav$Cruise)
+summary(M8)
+M81 <- lm(cav$Price~cav$Mileage+cav$Cruise+cav$Trim)
+summary(M81)
+
+anova(M8, M81)
+```
+From our anova table, we find that the two models are significantly different from one another. We conclude this by looking at our p-value which is quite small. Since the p-value is quite small, we can reject the null hypothesis, indicating that our Trim variable is significant in predicting the price. We also see a big jump in $R^2$ when we look at the two models side by side. 

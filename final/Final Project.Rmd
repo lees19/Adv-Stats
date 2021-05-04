@@ -1,0 +1,119 @@
+---
+title: "Final Project"
+author: "Sunny Lee"
+date: "4/5/2021"
+output: pdf_document
+---
+In this project, we are going to be applying multiplie linear regression and logistic regresion to a dataset about houses. 
+
+The data set consists of 24 explanatory variables and our response variable SalesPrice. There are both categorical and continuous variables in the
+```{r, echo = FALSE, warning=FALSE}
+library(fastDummies)
+house <- read.csv("housing.csv")
+attach(house)
+library(leaps)
+house_dummy <- dummy_cols(house)
+
+```
+
+```{r}
+drop <- c("Alley", "LotConfig", "Foundation", "AC", "KitchenQual", "GarageFinish")
+house_dummy <- house_dummy[, !(names(house_dummy) %in% drop)]
+house_dummy
+```
+
+```{r}
+hist(house_dummy[,"SalePrice"])
+
+#plot(SalePrice~., data = house_dummy)
+boxplot(house)
+```
+
+Linear regression - iid residuals
+```{r}
+cor(house_dummy[, c("LotConfig_CulDSac", "LotConfig_Corner", "LotConfig_FR2", "LotConfig_FR3", "LotConfig_Inside")])
+```
+
+```{r}
+names(house_dummy)
+model <- lm(SalePrice~.-ï..Order-Foundation-LotConfig-AC-Alley-YearRemod-HalfBath-KitchenQual-GarageFinish-PorchSF-YrSold, data = house)
+summary(model)
+hist(model$residuals)
+qqnorm(model$residuals)
+qqline(model$residuals)
+```
+```{r}
+names(house_dummy)
+dim(house_dummy)
+```
+
+```{r}
+alley_yes <- house[house$Alley == "yes", ]
+alley_no <- house[house$Alley == "no", ]
+length(alley_yes$SalePrice)
+length(alley_no$SalePrice)
+obs_diff <- mean(alley_no$SalePrice)-mean(alley_yes$SalePrice) 
+obs_diff
+
+p <- 10000
+sim_alley <- rep(0, p)
+alley <- c(alley_no$SalePrice, alley_yes$SalePrice)
+
+for (i in 1:p){
+  temp <- sample(alley, 2425, replace = FALSE)
+  sim_alley[i] <- mean(temp[138:2425]) - mean(temp[1:137]) 
+}
+
+hist(sim_alley)
+abline(v = obs_diff)
+p_value <- mean(sim_alley > obs_diff)
+p_value
+```
+
+```{r}
+ac_yes <- house[house$AC == "Y", ]
+ac_no <- house[house$AC == "N", ]
+length(ac_yes$SalePrice)
+length(ac_no$SalePrice)
+obs_diff <- mean(ac_yes$SalePrice) - mean(ac_no$SalePrice)
+obs_diff
+
+p <- 10000
+sim_ac <- rep(0, p)
+ac <- c(ac_no$SalePrice, ac_yes$SalePrice)
+
+for (i in 1:p){
+  temp <- sample(ac, 2425, replace = FALSE)
+  sim_ac[i] <- mean(temp[144:2425]) - mean(temp[1:143]) 
+}
+
+hist(sim_ac)
+abline(v = obs_diff)
+p_value <- mean(sim_ac > obs_diff)
+p_value
+```
+
+```{r}
+halfbath_yes <- house[house$HalfBath >= 1, ]
+halfbath_no <- house[house$HalfBath == 0, ]
+length(halfbath_no$SalePrice)
+length(halfbath_yes$SalePrice)
+obs_diff <- mean(halfbath_yes$SalePrice) - mean(halfbath_no$SalePrice)
+obs_diff
+
+p <- 10000
+sim_halfbath <- rep(0, p) 
+halfbath <- c(halfbath_no$SalePrice, halfbath_yes$SalePrice)
+
+for (i in 1:p){
+  temp <- sample(halfbath, 2425, replace = FALSE)
+  sim_halfbath[i] <- mean(temp[1386:2425]) - mean(temp[1:1385]) 
+}
+
+
+hist(sim_halfbath)
+abline(v = obs_diff)
+p_value <- mean(a > obs_diff)
+p_value
+```
+
